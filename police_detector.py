@@ -30,8 +30,10 @@ Oh Yeah, I Set It Down When I Got A Piece Of Cake!" - Clancy Wiggum, Chief of Vi
 # Open Sauce Software, tasty and free!
 #################################################################################################################
 import simplepyble, time, threading, logging
+from datetime import datetime
 #################################################################################################################
-
+current_dateTime = datetime.now()
+#################################################################################################################
 def logo():
     print(
             '''
@@ -67,60 +69,54 @@ Oh Yeah, I Set It Down When I Got A Piece Of Cake!" - Clancy Wiggum, Chief of Vi
 #################################################################################################################
                                             '''
         )
-
-
+police_detected = 0
 #if __name__ == "__main__":
 def GetBluetoothMacList():
     global count
     adapters = simplepyble.Adapter.get_adapters()
-
     if len(adapters) == 0:
         print("No adapters found")
-
     # Query the user to pick an adapter
     #print("Please select an adapter:")
     #for i, adapter in enumerate(adapters):
     #    print(f"{i}: {adapter.identifier()} [{adapter.address()}]")
-
     choice = int(0)
     adapter = adapters[choice]
-
-    print(f"Selected adapter: {adapter.identifier()} [{adapter.address()}]")
-
-    adapter.set_callback_on_scan_start(lambda: print("Scan started."))
-    adapter.set_callback_on_scan_stop(lambda: print("Scan complete."))
+    print(f" >>> Bluetooth adapter: {adapter.identifier()} [{adapter.address()}]")
+    adapter.set_callback_on_scan_start(lambda: print(" >>> Scan started.", current_dateTime))
+    adapter.set_callback_on_scan_stop(lambda: print(" >>> Scan complete.", current_dateTime))
     adapter.set_callback_on_scan_found(lambda peripheral: print(f"Found {peripheral.identifier()} [{peripheral.address()}]"))
-
     # Scan for 5 seconds
-    adapter.scan_for(5000)
-
+    adapter.scan_for(4500)
     peripherals = adapter.scan_get_results()
     count = count + 1
     print("Scan Count:", count)
     addr = "00:25:DF"
     for peripheral in peripherals:
         #print(peripheral.address())
+        detectionslog = open("detections.log", "a")
+        print(peripheral.address(), current_dateTime, file=detectionslog)
+        detectionslog.close()
         if "00:25:DF" in peripheral.address():
-            #print("POLICE in proximity")
-            print(
-            '''
-#################################################################################################################                                                                                                         
+            police_detected = police_detected + 1
+            print(" >>> Police Detected: ", police_detected, current_dateTime)
+            detectionslog = open("detections.log", "a")
+            print(" >>> Police Detected ", current_dateTime, file=detectionslog)
+            detectionslog.close()
+            if police_detected >= 5:
+                print(" >>> 5 POLICE OFFICERS DETECTED - POSSIBLE POLICE RAID IMMINENT")
+                detectionslog = open("detections.log", "a")
+                print(" >>> 5 POLICE OFFICERS DETECTED - POSSIBLE POLICE RAID IMMINENTa ", current_dateTime, file=detectionslog)
+                detectionslog.close()
+            
 
- *#####:         .##:*##                                      [ DETECTED IN PROXIMITY ]
- #######-        .##:###                                      [ DETECTED IN PROXIMITY ]
- ###::###  -==:  .##:-=-   ===     ===                        [ DETECTED IN PROXIMITY ]
- ###  ### ###### .##:###  #####- .#####:                      [ DETECTED IN PROXIMITY ]
- #######*-##. ##:.##:### *## ### ##+ :##                      [ DETECTED IN PROXIMITY ]
- ######* +##  ##*.##:### ###     #######.                     [ DETECTED IN PROXIMITY ]
- ###     =##  ##*.##:### ### :** ##+  .:                      [ DETECTED IN PROXIMITY ]
- ###      ###### .##:### -#####* =##*##*                      [ DETECTED IN PROXIMITY ]
- *##      .####. .##.*##  -###+   -###+                       [ DETECTED IN PROXIMITY ]
-
-#################################################################################################################
-                                            '''
-        )
         else:
-            print("No Police Detected")
+            time.sleep(0.05125)
+            print("No Police Detected ", current_dateTime)
+            detectionslog = open("detections.log", "a")
+            print("No Police Detected ", current_dateTime, file=detectionslog)
+            detectionslog.close()
+            
 def detect():
     while True:
         try:
